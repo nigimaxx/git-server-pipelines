@@ -2,6 +2,7 @@
 
 ## Requirements
 
+- [BitBar](https://getbitbar.com/)
 - Golang
 - Go Modules
 
@@ -11,11 +12,11 @@
 go build -o gitlab-pipelines.20s.cgo gitlab-pipelines.20s.go
 ```
 
-Move `gitlab-pipelines.20s.cgo` to your BitBar Plugins Folder
+Move `gitlab-pipelines.20s.cgo` to your BitBar Plugins Folder.
 
 ## Configuration
 
-Put a `yaml` file in `~/bitbar/gitlab-config.yaml`
+Put a `yaml` file in `~/bitbar/gitlab-config.yaml`.
 
 ```yaml
 token: { access-token }
