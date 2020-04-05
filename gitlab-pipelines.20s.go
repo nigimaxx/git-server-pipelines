@@ -15,6 +15,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"time"
@@ -136,7 +137,7 @@ func readConfig() (*Config, error) {
 
 func isInList(s string, list []string) bool {
 	for _, i := range list {
-		if i == s {
+		if matched, _ := filepath.Match(i, s); matched {
 			return true
 		}
 	}
