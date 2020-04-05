@@ -16,12 +16,16 @@ Move `gitlab-pipelines.20s.cgo` to your BitBar Plugins Folder.
 
 ## Configuration
 
-Put a `yaml` file in `~/bitbar/gitlab-config.yaml`.
+Create a `~/bitbar/gitlab-config.yaml`.
 
 ```yaml
 token: { access-token }
-baseURL: { api-base eg. https://gitlab.example.com/api/v4 }
+baseURL: { api-base e.g. https://gitlab.example.com/api/v4 }
 projects:
-  - { path_with_namespace of project }
+  - { path_with_namespace of project or pattern }
   - test-namespace/test-project
+  - other-test-namespace/*
+  - '*/*'
 ```
+
+Pattern matching with [filepath.Match](https://golang.org/pkg/path/filepath/#Match)
