@@ -20,6 +20,7 @@ Create a `~/bitbar/gitlab-config.yaml`.
 
 ```yaml
 token: { access-token }
+daysUntilInactive: { only projects with pipeline builds fewer days ago are listed }
 baseURL: { api-base e.g. https://gitlab.example.com/api/v4 }
 projects:
   - { path_with_namespace of project or pattern }

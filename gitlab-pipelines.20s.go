@@ -25,9 +25,10 @@ import (
 )
 
 type Config struct {
-	BaseURL  string   `yaml:"baseURL"`
-	Token    string   `yaml:"token"`
-	Projects []string `yaml:"projects"`
+	BaseURL           string   `yaml:"baseURL"`
+	Token             string   `yaml:"token"`
+	DaysUntilInactive int      `yaml:"daysUntilInactive"`
+	Projects          []string `yaml:"projects"`
 }
 
 type ActiveProject struct {
@@ -74,7 +75,7 @@ func main() {
 					status = "running"
 				}
 
-				if time.Now().Sub(*pipeline.UpdatedAt) < 7*24*time.Hour {
+				if time.Now().Sub(*pipeline.UpdatedAt) < time.Duration(config.DaysUntilInactive)*24*time.Hour {
 					activeProjects = append(activeProjects, ActiveProject{name, project.WebURL, pipeline.ID, status})
 				}
 			}
