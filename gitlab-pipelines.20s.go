@@ -1,7 +1,7 @@
 package main
 
 // <bitbar.title>GitLab Pipelines Status</bitbar.title>
-// <bitbar.version>v0.1</bitbar.version>
+// <bitbar.version>v0.2</bitbar.version>
 // <bitbar.author>Niklas Mack</bitbar.author>
 // <bitbar.author.github>nigimaxx</bitbar.author.github>
 // <bitbar.desc>Get the Status of your GitLab Pipelines</bitbar.desc>
@@ -83,7 +83,6 @@ func main() {
 
 	sort.Slice(activeProjects, func(i, j int) bool {
 		return activeProjects[i].PipelineID > activeProjects[j].PipelineID
-
 	})
 
 	fmt.Println(icons[overAllStatus(activeProjects)])
@@ -146,6 +145,11 @@ func isInList(s string, list []string) bool {
 
 func overAllStatus(projects []ActiveProject) string {
 	status := "success"
+
+	if len(projects) == 0 {
+		return "skipped"
+	}
+
 	for _, p := range projects {
 		if p.Status == "running" {
 			status = p.Status
