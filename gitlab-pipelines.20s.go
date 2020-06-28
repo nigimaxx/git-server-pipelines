@@ -25,20 +25,25 @@ import (
 )
 
 type Config struct {
-	BaseURL           string   `yaml:"baseURL"`
-	Token             string   `yaml:"token"`
-	DaysUntilInactive int      `yaml:"daysUntilInactive"`
-	Projects          []string `yaml:"projects"`
+	DaysUntilInactive int            `yaml:"daysUntilInactive"`
+	Servers           []ServerConfig `yaml:"servers"`
+}
+
+type ServerConfig struct {
+	Name     string   `yaml:"name"`
+	BaseURL  string   `yaml:"baseURL"`
+	Token    string   `yaml:"token"`
+	Projects []string `yaml:"projects"`
 }
 
 type ActiveProject struct {
 	Name       string
 	URL        string
-	PipelineID int
 	Status     string
+	ServerName string
+	UpdatedAt  time.Time
 }
 
-var git *gitlab.Client
 var icons = map[string]string{
 	"success":  "🟢",
 	"failed":   "🔴",
@@ -53,37 +58,39 @@ func main() {
 		log.Fatal(err)
 	}
 
-	git = gitlab.NewClient(nil, config.Token)
-	git.SetBaseURL(config.BaseURL)
-
-	projects, err := getAllProjects()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	var activeProjects []ActiveProject
 
-	for _, project := range projects {
-		name := project.PathWithNamespace
+	for _, server := range config.Servers {
+		git := gitlab.NewClient(nil, server.Token)
+		git.SetBaseURL(server.BaseURL)
 
-		if isInList(name, config.Projects) {
-			pipelines, _, _ := git.Pipelines.ListProjectPipelines(project.ID, &gitlab.ListProjectPipelinesOptions{ListOptions: gitlab.ListOptions{PerPage: 1}})
+		projects, err := getAllProjects(git)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-			for _, pipeline := range pipelines {
-				status := pipeline.Status
-				if status == "pending" {
-					status = "running"
-				}
+		for _, project := range projects {
+			name := project.PathWithNamespace
 
-				if time.Now().Sub(*pipeline.UpdatedAt) < time.Duration(config.DaysUntilInactive)*24*time.Hour {
-					activeProjects = append(activeProjects, ActiveProject{name, project.WebURL, pipeline.ID, status})
+			if isInList(name, server.Projects) {
+				pipelines, _, _ := git.Pipelines.ListProjectPipelines(project.ID, &gitlab.ListProjectPipelinesOptions{ListOptions: gitlab.ListOptions{PerPage: 1}})
+
+				for _, pipeline := range pipelines {
+					status := pipeline.Status
+					if status == "pending" {
+						status = "running"
+					}
+
+					if time.Now().Sub(*pipeline.UpdatedAt) < time.Duration(config.DaysUntilInactive)*24*time.Hour {
+						activeProjects = append(activeProjects, ActiveProject{name, pipeline.WebURL, status, server.Name, *pipeline.UpdatedAt})
+					}
 				}
 			}
 		}
 	}
 
 	sort.Slice(activeProjects, func(i, j int) bool {
-		return activeProjects[i].PipelineID > activeProjects[j].PipelineID
+		return activeProjects[i].UpdatedAt.After(activeProjects[j].UpdatedAt)
 	})
 
 	fmt.Println(icons[overAllStatus(activeProjects)])
@@ -91,16 +98,16 @@ func main() {
 	fmt.Println("---")
 
 	for _, p := range activeProjects {
-		fmt.Printf("%s %s | href=%s/pipelines\n", icons[p.Status], p.Name, p.URL)
+		fmt.Printf("%s %s (%s) | href=%s\n", icons[p.Status], p.Name, p.ServerName, p.URL)
 	}
 }
 
-func getAllProjects() ([]*gitlab.Project, error) {
+func getAllProjects(git *gitlab.Client) ([]*gitlab.Project, error) {
 	var allProjects []*gitlab.Project
 	page := 1
 
 	for page > 0 {
-		projects, response, err := git.Projects.ListProjects(&gitlab.ListProjectsOptions{ListOptions: gitlab.ListOptions{Page: page, PerPage: 100}})
+		projects, response, err := git.Projects.ListProjects(&gitlab.ListProjectsOptions{ListOptions: gitlab.ListOptions{Page: page, PerPage: 100}, Membership: gitlab.Bool(true)})
 		if err != nil {
 			return nil, err
 		}
