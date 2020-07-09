@@ -45,11 +45,14 @@ type ActiveProject struct {
 }
 
 var icons = map[string]string{
-	"success":  "🟢",
-	"failed":   "🔴",
-	"canceled": "🟠",
-	"skipped":  "⚪️",
+	"created":  "🟣",
+	"pending":  "🟡",
 	"running":  "🔵",
+	"success":  "🟢",
+	"canceled": "🟠",
+	"failed":   "🔴",
+	"skipped":  "⚪️",
+	"manual":   "⚫️",
 }
 
 func main() {
