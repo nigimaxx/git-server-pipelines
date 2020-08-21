@@ -3,6 +3,8 @@ module github.com/nigimaxx/gitlab-jobs
 go 1.14
 
 require (
-	github.com/xanzy/go-gitlab v0.28.0
-	gopkg.in/yaml.v2 v2.2.8
+	github.com/google/go-github/v32 v32.1.0
+	github.com/xanzy/go-gitlab v0.33.0
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	gopkg.in/yaml.v2 v2.3.0
 )
