@@ -214,6 +214,9 @@ func main() {
 	for _, p := range activeProjects {
 		fmt.Printf("%s %s (%s) | href=%s\n", p.Status, p.Name, p.ServerName, p.URL)
 	}
+
+	fmt.Println("---")
+	fmt.Println("Refresh | refresh=true")
 }
 
 // GetActiveWorkflow gets the latest workflow of a github repository
