@@ -239,7 +239,6 @@ func (server *GithubServer) GetActiveWorkflow(owner, name string) (*ActiveProjec
 		}
 
 		if time.Now().Sub(run.UpdatedAt.Time) < time.Duration(config.DaysUntilInactive)*24*time.Hour {
-
 			return &ActiveProject{
 				Name:       fmt.Sprintf("%s/%s", owner, name),
 				URL:        *run.HTMLURL,
@@ -329,7 +328,7 @@ func readConfig() (*Config, error) {
 		return nil, err
 	}
 
-	data, err := ioutil.ReadFile(path.Join(home, "bitbar", "gitlab-config.yaml"))
+	data, err := ioutil.ReadFile(path.Join(home, "projects", "private", "bitbar-config", "gitlab-config.yaml"))
 	if err != nil {
 		return nil, err
 	}
@@ -359,12 +358,23 @@ func overAllStatus(projects []ActiveProject) string {
 	}
 
 	for _, p := range projects {
-		if p.Status == "🔵" {
-			status = p.Status
-		} else if p.Status == "🔴" && status != "🔵" {
+		if iconWeight(p.Status) > iconWeight(status) {
 			status = p.Status
 		}
 	}
 
 	return status
+}
+
+func iconWeight(icon string) int {
+	switch icon {
+	case "🟢":
+		return 1
+	case "🔴":
+		return 2
+	case "🔵":
+		return 3
+	default:
+		return 0
+	}
 }
